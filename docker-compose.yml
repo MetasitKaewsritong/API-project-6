@@ -1,0 +1,24 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-music-library
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: music_library
+    ports:
+      # 3307 บนเครื่องเรา เพราะ 3306 ถูกใช้โดย container ของ student-api อยู่แล้ว
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # ไฟล์ .sql จะถูกรันอัตโนมัติครั้งแรกที่สร้าง container เรียงตามชื่อไฟล์
+      - ./schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:ro
+      - ./seed.sql:/docker-entrypoint-initdb.d/2-seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mysql-data:
