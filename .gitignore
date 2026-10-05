@@ -4,3 +4,7 @@ test*
 images/
 *.zip
 *.pdf
+*.log
+.claude/
+.vscode/
+.DS_Store

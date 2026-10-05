@@ -1,0 +1,2210 @@
+{
+  "info": {
+    "name": "Music Library API - 67160005",
+    "description": "โครงงานระยะที่ 2 | ระบบข้อมูลเพลง (Pno 6)\n\nตัวอย่าง response ทุกรายการบันทึกจากการยิง request จริงไปยังระบบ โดยเริ่มจากฐานข้อมูลหลังรัน schema.sql และ seed.sql ควรรันเรียงจากบนลงล่าง เพราะรายการแก้ไข/ลบใช้ข้อมูลที่รายการก่อนหน้าสร้างไว้",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3100"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "ตรวจสถานะเซิร์ฟเวอร์",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "ตรวจว่าเซิร์ฟเวอร์ทำงานอยู่"
+          },
+          "response": [
+            {
+              "name": "200 พร้อมใช้งาน",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Music Library API is ready to use!\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Artists",
+      "item": [
+        {
+          "name": "รายชื่อศิลปินทั้งหมด",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/artists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "artists"
+              ]
+            },
+            "description": "คืนศิลปินทุกคนเรียงตามชื่อ"
+          },
+          "response": [
+            {
+              "name": "200 สำเร็จ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/artists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "artists"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Bodyslam\",\n      \"country\": \"ไทย\",\n      \"created_at\": \"2026-10-05T03:29:18.000Z\"\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Coldplay\",\n      \"country\": \"สหราชอาณาจักร\",\n      \"created_at\": \"2026-10-05T03:29:18.000Z\"\n    },\n    {\n      \"id\": 4,\n      \"name\": \"Daft Punk\",\n      \"country\": \"ฝรั่งเศส\",\n      \"created_at\": \"2026-10-05T03:29:18.000Z\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Three Man Down\",\n      \"country\": \"ไทย\",\n      \"created_at\": \"2026-10-05T03:29:18.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "เพิ่มศิลปินใหม่",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/artists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "artists"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Radiohead\",\n  \"country\": \"สหราชอาณาจักร\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "UC-04 ชื่อศิลปินต้องไม่ซ้ำกับที่มีอยู่"
+          },
+          "response": [
+            {
+              "name": "201 เพิ่มสำเร็จ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/artists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "artists"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Radiohead\",\n  \"country\": \"สหราชอาณาจักร\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"เพิ่มศิลปินสำเร็จ\",\n  \"data\": {\n    \"id\": 5,\n    \"name\": \"Radiohead\",\n    \"country\": \"สหราชอาณาจักร\",\n    \"created_at\": \"2026-10-05T03:29:22.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 ข้อมูลไม่ครบ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/artists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "artists"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Oasis\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"name (ไม่เกิน 120 ตัวอักษร) และ country (ไม่เกิน 80 ตัวอักษร) ต้องเป็นข้อความที่ไม่ว่าง\"\n  }\n}"
+            },
+            {
+              "name": "400 JSON ผิดรูปแบบ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/artists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "artists"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"name\": \"Oasis\", ",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_JSON\",\n    \"message\": \"รูปแบบ JSON ไม่ถูกต้อง\"\n  }\n}"
+            },
+            {
+              "name": "409 ชื่อซ้ำ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/artists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "artists"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Bodyslam\",\n  \"country\": \"ไทย\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"DUPLICATE_ARTIST\",\n    \"message\": \"มีศิลปินชื่อนี้อยู่แล้ว\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "เพลงทั้งหมดของศิลปิน",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/artists/3/songs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "artists",
+                "3",
+                "songs"
+              ]
+            },
+            "description": "UC-02 คืนข้อมูลศิลปินพร้อมรายการเพลง"
+          },
+          "response": [
+            {
+              "name": "200 สำเร็จ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/artists/3/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "artists",
+                    "3",
+                    "songs"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": {\n    \"id\": 3,\n    \"name\": \"Coldplay\",\n    \"country\": \"สหราชอาณาจักร\",\n    \"song_count\": 2,\n    \"songs\": [\n      {\n        \"id\": 5,\n        \"title\": \"Yellow\",\n        \"duration_seconds\": 269,\n        \"release_year\": 2000\n      },\n      {\n        \"id\": 6,\n        \"title\": \"Viva La Vida\",\n        \"duration_seconds\": 242,\n        \"release_year\": 2008\n      }\n    ]\n  }\n}"
+            },
+            {
+              "name": "400 id ไม่ถูกต้อง",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/artists/abc/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "artists",
+                    "abc",
+                    "songs"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_ID\",\n    \"message\": \"id ต้องเป็นจำนวนเต็มบวก\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบศิลปิน",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/artists/999/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "artists",
+                    "999",
+                    "songs"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบศิลปินที่ระบุ\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Songs",
+      "item": [
+        {
+          "name": "รายการเพลงทั้งหมด",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/songs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "songs"
+              ]
+            },
+            "description": "คืนเพลงทั้งหมดพร้อมชื่อศิลปิน"
+          },
+          "response": [
+            {
+              "name": "200 สำเร็จ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"title\": \"ความเชื่อ\",\n      \"duration_seconds\": 342,\n      \"release_year\": 2004,\n      \"artist_id\": 1,\n      \"artist_name\": \"Bodyslam\"\n    },\n    {\n      \"id\": 2,\n      \"title\": \"ปล่อย\",\n      \"duration_seconds\": 258,\n      \"release_year\": 2010,\n      \"artist_id\": 1,\n      \"artist_name\": \"Bodyslam\"\n    },\n    {\n      \"id\": 6,\n      \"title\": \"Viva La Vida\",\n      \"duration_seconds\": 242,\n      \"release_year\": 2008,\n      \"artist_id\": 3,\n      \"artist_name\": \"Coldplay\"\n    },\n    {\n      \"id\": 5,\n      \"title\": \"Yellow\",\n      \"duration_seconds\": 269,\n      \"release_year\": 2000,\n      \"artist_id\": 3,\n      \"artist_name\": \"Coldplay\"\n    },\n    {\n      \"id\": 7,\n      \"title\": \"Get Lucky\",\n      \"duration_seconds\": 369,\n      \"release_year\": 2013,\n      \"artist_id\": 4,\n      \"artist_name\": \"Daft Punk\"\n    },\n    {\n      \"id\": 8,\n      \"title\": \"Instant Crush\",\n      \"duration_seconds\": 337,\n      \"release_year\": 2013,\n      \"artist_id\": 4,\n      \"artist_name\": \"Daft Punk\"\n    },\n    {\n      \"id\": 3,\n      \"title\": \"ทุกอย่าง\",\n      \"duration_seconds\": 245,\n      \"release_year\": 2019,\n      \"artist_id\": 2,\n      \"artist_name\": \"Three Man Down\"\n    },\n    {\n      \"id\": 4,\n      \"title\": \"ยิ่งกว่าเสียใจ\",\n      \"duration_seconds\": 268,\n      \"release_year\": 2021,\n      \"artist_id\": 2,\n      \"artist_name\": \"Three Man Down\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "500 เชื่อมต่อฐานข้อมูลไม่ได้",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "ค้นหาเพลง",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/songs?q=Coldplay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "songs"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Coldplay"
+                }
+              ]
+            },
+            "description": "UC-01 ค้นจากชื่อเพลงหรือชื่อศิลปินด้วย query string q"
+          },
+          "response": [
+            {
+              "name": "200 พบเพลง",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs?q=Coldplay",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "Coldplay"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": [\n    {\n      \"id\": 6,\n      \"title\": \"Viva La Vida\",\n      \"duration_seconds\": 242,\n      \"release_year\": 2008,\n      \"artist_id\": 3,\n      \"artist_name\": \"Coldplay\"\n    },\n    {\n      \"id\": 5,\n      \"title\": \"Yellow\",\n      \"duration_seconds\": 269,\n      \"release_year\": 2000,\n      \"artist_id\": 3,\n      \"artist_name\": \"Coldplay\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "200 ไม่พบเพลงที่ตรง",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs?q=zzzzz",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "zzzzz"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "รายละเอียดเพลง",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/songs/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "songs",
+                "5"
+              ]
+            },
+            "description": "คืนข้อมูลเพลงหนึ่งเพลง"
+          },
+          "response": [
+            {
+              "name": "200 สำเร็จ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/5",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "5"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": {\n    \"id\": 5,\n    \"title\": \"Yellow\",\n    \"duration_seconds\": 269,\n    \"release_year\": 2000,\n    \"artist_id\": 3,\n    \"artist_name\": \"Coldplay\"\n  }\n}"
+            },
+            {
+              "name": "400 id ไม่ถูกต้อง",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/abc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "abc"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_ID\",\n    \"message\": \"id ต้องเป็นจำนวนเต็มบวก\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบเพลง",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบเพลงที่ระบุ\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "เพิ่มเพลงใหม่",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/songs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "songs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"artist_id\": 3,\n  \"title\": \"Fix You\",\n  \"duration_seconds\": 295,\n  \"release_year\": 2005\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "UC-03 ศิลปินต้องมีอยู่จริง และศิลปินคนเดียวกันมีเพลงชื่อซ้ำไม่ได้"
+          },
+          "response": [
+            {
+              "name": "201 เพิ่มสำเร็จ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 3,\n  \"title\": \"Fix You\",\n  \"duration_seconds\": 295,\n  \"release_year\": 2005\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"เพิ่มเพลงสำเร็จ\",\n  \"data\": {\n    \"id\": 9,\n    \"title\": \"Fix You\",\n    \"duration_seconds\": 295,\n    \"release_year\": 2005,\n    \"artist_id\": 3,\n    \"artist_name\": \"Coldplay\"\n  }\n}"
+            },
+            {
+              "name": "400 ชื่อเพลงยาวเกิน 180 ตัวอักษร",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 3,\n  \"title\": \"กกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกกก\",\n  \"duration_seconds\": 200\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"title ต้องเป็นข้อความที่ไม่ว่าง ยาวไม่เกิน 180 ตัวอักษร\"\n  }\n}"
+            },
+            {
+              "name": "400 ความยาวเพลงติดลบ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 3,\n  \"title\": \"The Scientist\",\n  \"duration_seconds\": -5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"duration_seconds ต้องเป็นจำนวนเต็มบวก\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบศิลปิน",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 999,\n  \"title\": \"Unknown\",\n  \"duration_seconds\": 200\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"ARTIST_NOT_FOUND\",\n    \"message\": \"ไม่พบศิลปินที่ระบุ\"\n  }\n}"
+            },
+            {
+              "name": "409 เพลงชื่อซ้ำ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 3,\n  \"title\": \"Yellow\",\n  \"duration_seconds\": 269,\n  \"release_year\": 2000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"DUPLICATE_SONG\",\n    \"message\": \"ศิลปินคนนี้มีเพลงชื่อนี้อยู่แล้ว\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "แก้ไขเพลง",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/songs/9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "songs",
+                "9"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"artist_id\": 3,\n  \"title\": \"Fix You (Live)\",\n  \"duration_seconds\": 312,\n  \"release_year\": 2006\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "แก้ไขข้อมูลเพลงทั้งระเบียน (เพลง id 9 คือเพลงที่เพิ่งเพิ่มในรายการก่อนหน้า)"
+          },
+          "response": [
+            {
+              "name": "200 แก้ไขสำเร็จ",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/9",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "9"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 3,\n  \"title\": \"Fix You (Live)\",\n  \"duration_seconds\": 312,\n  \"release_year\": 2006\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"แก้ไขเพลงสำเร็จ\",\n  \"data\": {\n    \"id\": 9,\n    \"title\": \"Fix You (Live)\",\n    \"duration_seconds\": 312,\n    \"release_year\": 2006,\n    \"artist_id\": 3,\n    \"artist_name\": \"Coldplay\"\n  }\n}"
+            },
+            {
+              "name": "400 ไม่มี title",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/9",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "9"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 3,\n  \"duration_seconds\": 312\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"title ต้องเป็นข้อความที่ไม่ว่าง ยาวไม่เกิน 180 ตัวอักษร\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบเพลง",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "999"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 3,\n  \"title\": \"Fix You\",\n  \"duration_seconds\": 295\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบเพลงที่ระบุ\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบศิลปิน",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/9",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "9"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 999,\n  \"title\": \"Fix You\",\n  \"duration_seconds\": 295\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"ARTIST_NOT_FOUND\",\n    \"message\": \"ไม่พบศิลปินที่ระบุ\"\n  }\n}"
+            },
+            {
+              "name": "409 เพลงชื่อซ้ำ",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/9",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "9"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"artist_id\": 3,\n  \"title\": \"Yellow\",\n  \"duration_seconds\": 269\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"DUPLICATE_SONG\",\n    \"message\": \"ศิลปินคนนี้มีเพลงชื่อนี้อยู่แล้ว\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "ลบเพลง",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/songs/9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "songs",
+                "9"
+              ]
+            },
+            "description": "ลบเพลงออกจากคลัง เพลงจะหลุดจากทุกเพลย์ลิสต์อัตโนมัติ"
+          },
+          "response": [
+            {
+              "name": "204 ลบสำเร็จ",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/9",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "9"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "400 id ไม่ถูกต้อง",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/abc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "abc"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_ID\",\n    \"message\": \"id ต้องเป็นจำนวนเต็มบวก\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบเพลง",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/9",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "9"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบเพลงที่ระบุ\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "External",
+      "item": [
+        {
+          "name": "ข้อมูลเสริมของเพลงจาก iTunes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/songs/5/external-info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "songs",
+                "5",
+                "external-info"
+              ]
+            },
+            "description": "เรียก iTunes Search API พร้อม timeout, retry และ fallback ดูที่มาของข้อมูลจาก data.source"
+          },
+          "response": [
+            {
+              "name": "200 ได้ข้อมูลจาก iTunes",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/5/external-info",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "5",
+                    "external-info"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": {\n    \"song\": {\n      \"id\": 5,\n      \"title\": \"Yellow\",\n      \"duration_seconds\": 269,\n      \"release_year\": 2000,\n      \"artist_id\": 3,\n      \"artist_name\": \"Coldplay\"\n    },\n    \"external_info\": {\n      \"album\": \"Parachutes\",\n      \"genre\": \"Alternative\",\n      \"artwork_url\": \"https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/f5/93/8c/f5938c49-964c-31d1-4b33-78b634f71fb7/190295978075.jpg/100x100bb.jpg\",\n      \"preview_url\": \"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/66/f3/1a/66f31a76-a6ed-cb4c-f353-23310a7ae9a8/mzaf_10593596652344378873.plus.aac.p.m4a\",\n      \"track_url\": \"https://music.apple.com/us/album/yellow/1122782080?i=1122782283&uo=4\"\n    },\n    \"source\": \"itunes\",\n    \"attempts\": 1\n  }\n}"
+            },
+            {
+              "name": "200 iTunes ล้มเหลว ใช้ค่าเริ่มต้น (fallback)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/5/external-info",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "5",
+                    "external-info"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"ไม่สามารถดึงข้อมูลเสริมจากบริการภายนอกได้ จึงแสดงค่าเริ่มต้นแทน\",\n  \"data\": {\n    \"song\": {\n      \"id\": 5,\n      \"title\": \"Yellow\",\n      \"duration_seconds\": 269,\n      \"release_year\": 2000,\n      \"artist_id\": 3,\n      \"artist_name\": \"Coldplay\"\n    },\n    \"external_info\": {\n      \"album\": null,\n      \"genre\": \"ไม่ทราบ\",\n      \"artwork_url\": null,\n      \"preview_url\": null,\n      \"track_url\": null\n    },\n    \"source\": \"fallback\",\n    \"attempts\": 3,\n    \"reason\": \"HTTP 503\"\n  }\n}"
+            },
+            {
+              "name": "400 id ไม่ถูกต้อง",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/abc/external-info",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "abc",
+                    "external-info"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_ID\",\n    \"message\": \"id ต้องเป็นจำนวนเต็มบวก\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบเพลง",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/songs/999/external-info",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "songs",
+                    "999",
+                    "external-info"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบเพลงที่ระบุ\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Playlists",
+      "item": [
+        {
+          "name": "เพลย์ลิสต์ทั้งหมด",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/playlists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "playlists"
+              ]
+            },
+            "description": "คืนเพลย์ลิสต์ทุกรายการพร้อมจำนวนเพลง"
+          },
+          "response": [
+            {
+              "name": "200 สำเร็จ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": [\n    {\n      \"id\": 3,\n      \"name\": \"เพลงสากลยุค 2000\",\n      \"owner_name\": \"สมชาย ใจดี\",\n      \"created_at\": \"2026-10-05T03:29:18.000Z\",\n      \"song_count\": 3\n    },\n    {\n      \"id\": 1,\n      \"name\": \"เพลงไทยฟังชิล\",\n      \"owner_name\": \"สมชาย ใจดี\",\n      \"created_at\": \"2026-10-05T03:29:18.000Z\",\n      \"song_count\": 4\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Workout Mix\",\n      \"owner_name\": \"สมหญิง รักเรียน\",\n      \"created_at\": \"2026-10-05T03:29:18.000Z\",\n      \"song_count\": 2\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "สร้างเพลย์ลิสต์",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/playlists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "playlists"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"เพลงอ่านหนังสือ\",\n  \"owner_name\": \"สมหญิง รักเรียน\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "UC-05 เจ้าของคนเดียวกันตั้งชื่อเพลย์ลิสต์ซ้ำไม่ได้"
+          },
+          "response": [
+            {
+              "name": "201 สร้างสำเร็จ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"เพลงอ่านหนังสือ\",\n  \"owner_name\": \"สมหญิง รักเรียน\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สร้างเพลย์ลิสต์สำเร็จ\",\n  \"data\": {\n    \"id\": 4,\n    \"name\": \"เพลงอ่านหนังสือ\",\n    \"owner_name\": \"สมหญิง รักเรียน\",\n    \"created_at\": \"2026-10-05T03:29:24.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 ข้อมูลไม่ครบ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"เพลงอ่านหนังสือ\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"name (ไม่เกิน 120 ตัวอักษร) และ owner_name (ไม่เกิน 100 ตัวอักษร) ต้องเป็นข้อความที่ไม่ว่าง\"\n  }\n}"
+            },
+            {
+              "name": "409 ชื่อซ้ำ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Workout Mix\",\n  \"owner_name\": \"สมหญิง รักเรียน\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"DUPLICATE_PLAYLIST\",\n    \"message\": \"เจ้าของคนนี้มีเพลย์ลิสต์ชื่อนี้อยู่แล้ว\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "รายละเอียดเพลย์ลิสต์",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/playlists/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "playlists",
+                "1"
+              ]
+            },
+            "description": "UC-08 คืนรายชื่อเพลง จำนวนเพลง และความยาวรวม"
+          },
+          "response": [
+            {
+              "name": "200 สำเร็จ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"เพลงไทยฟังชิล\",\n    \"owner_name\": \"สมชาย ใจดี\",\n    \"created_at\": \"2026-10-05T03:29:18.000Z\",\n    \"song_count\": 4,\n    \"total_duration_seconds\": 1113,\n    \"songs\": [\n      {\n        \"id\": 1,\n        \"title\": \"ความเชื่อ\",\n        \"duration_seconds\": 342,\n        \"artist_name\": \"Bodyslam\"\n      },\n      {\n        \"id\": 2,\n        \"title\": \"ปล่อย\",\n        \"duration_seconds\": 258,\n        \"artist_name\": \"Bodyslam\"\n      },\n      {\n        \"id\": 3,\n        \"title\": \"ทุกอย่าง\",\n        \"duration_seconds\": 245,\n        \"artist_name\": \"Three Man Down\"\n      },\n      {\n        \"id\": 4,\n        \"title\": \"ยิ่งกว่าเสียใจ\",\n        \"duration_seconds\": 268,\n        \"artist_name\": \"Three Man Down\"\n      }\n    ]\n  }\n}"
+            },
+            {
+              "name": "400 id ไม่ถูกต้อง",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/abc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "abc"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_ID\",\n    \"message\": \"id ต้องเป็นจำนวนเต็มบวก\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบเพลย์ลิสต์",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบเพลย์ลิสต์ที่ระบุ\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "เพิ่มเพลงเข้าเพลย์ลิสต์",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/playlists/2/songs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "playlists",
+                "2",
+                "songs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"song_id\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "UC-06 เพลงเดิมเพิ่มซ้ำในเพลย์ลิสต์เดียวกันไม่ได้"
+          },
+          "response": [
+            {
+              "name": "201 เพิ่มสำเร็จ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/2/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "2",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"song_id\": 5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"เพิ่มเพลงเข้าเพลย์ลิสต์สำเร็จ\",\n  \"data\": {\n    \"id\": 10,\n    \"playlist_id\": 2,\n    \"song_id\": 5,\n    \"added_at\": \"2026-10-05T03:29:24.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 ไม่มี song_id",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/2/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "2",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"song_id ต้องเป็นจำนวนเต็มบวก\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบเพลย์ลิสต์",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/999/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "999",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"song_id\": 5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบเพลย์ลิสต์ที่ระบุ\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบเพลง",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/2/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "2",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"song_id\": 999\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"SONG_NOT_FOUND\",\n    \"message\": \"ไม่พบเพลงที่ระบุ\"\n  }\n}"
+            },
+            {
+              "name": "409 เพลงอยู่ในเพลย์ลิสต์แล้ว",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/2/songs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "2",
+                    "songs"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"song_id\": 5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"DUPLICATE_PLAYLIST_SONG\",\n    \"message\": \"เพลงนี้อยู่ในเพลย์ลิสต์อยู่แล้ว\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "ลบเพลงออกจากเพลย์ลิสต์",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/playlists/2/songs/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "playlists",
+                "2",
+                "songs",
+                "5"
+              ]
+            },
+            "description": "UC-07 ลบเฉพาะความเชื่อมโยง ข้อมูลเพลงในคลังยังอยู่"
+          },
+          "response": [
+            {
+              "name": "204 ลบสำเร็จ",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/2/songs/5",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "2",
+                    "songs",
+                    "5"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "400 id ไม่ถูกต้อง",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/2/songs/abc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "2",
+                    "songs",
+                    "abc"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_ID\",\n    \"message\": \"id ต้องเป็นจำนวนเต็มบวก\"\n  }\n}"
+            },
+            {
+              "name": "404 ไม่พบเพลงนี้ในเพลย์ลิสต์",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/playlists/2/songs/5",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "playlists",
+                    "2",
+                    "songs",
+                    "5"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบเพลงนี้ในเพลย์ลิสต์ที่ระบุ\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,19 +1,22 @@
 {
   "name": "music-library-api",
   "version": "1.0.0",
-  "description": "โครงงานระยะที่ 1 - ระบบข้อมูลเพลง (Pno 6) รหัสนิสิต 67160005",
-  "main": "index.js",
+  "description": "โครงงานระยะที่ 2 - ระบบข้อมูลเพลง (Pno 6) รหัสนิสิต 67160005",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "author": "67160005",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "axios": "^1.20.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mysql2": "^3.23.3"
+    "mysql2": "^3.23.3",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
