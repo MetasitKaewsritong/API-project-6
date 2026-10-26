@@ -1,0 +1,40 @@
+# ==============================================================================
+# docker-compose.yml — รัน MySQL 8.0 ใน Docker
+# ------------------------------------------------------------------------------
+# หน้าที่ : เปิด MySQL พร้อมสร้างตารางและข้อมูลตัวอย่างให้อัตโนมัติ
+# ทำไม   : ทุกเครื่องได้สภาพแวดล้อมเหมือนกัน ไม่ต้องติดตั้ง MySQL ลงเครื่องจริง
+# Sprint : 0 | Phase 1
+# ==============================================================================
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-music-library
+    # หน้าที่: ถ้า container ดับเอง ให้เริ่มใหม่ (ยกเว้นเราสั่งหยุดเอง)
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: music_library
+
+    # ทำไม: map พอร์ต 3307 (เครื่องเรา) -> 3306 (ใน container) เลี่ยงชนกับ MySQL ตัวอื่น
+    ports:
+      - "3307:3306"
+
+    volumes:
+      # หน้าที่: เก็บข้อมูลจริง ลบ/รีสตาร์ต container แล้วข้อมูลไม่หาย
+      - mysql-data:/var/lib/mysql
+      # ถามอาจารย์: ไฟล์ใน initdb.d รันอัตโนมัติ "เฉพาะครั้งแรกที่สร้าง volume" เรียงตามชื่อไฟล์
+      #             ถ้าแก้ schema ทีหลังต้อง `docker compose down -v` ก่อน
+      - ./schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:ro
+      - ./seed.sql:/docker-entrypoint-initdb.d/2-seed.sql:ro
+
+    # หน้าที่: เช็คว่า MySQL พร้อมรับ query จริงหรือยัง
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mysql-data:

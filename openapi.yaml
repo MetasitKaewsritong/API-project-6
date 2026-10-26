@@ -1,0 +1,767 @@
+# ==============================================================================
+# openapi.yaml — เอกสาร API ของ Music Library API (OpenAPI 3.0)
+# ------------------------------------------------------------------------------
+# หน้าที่ : บรรยายทุก endpoint (17 เส้น) พร้อม request, response และรหัส error ทุกกรณี
+# ทำไม   : เป็นสัญญาระหว่าง API กับผู้เรียกใช้ และให้ Swagger UI (/api-docs) สร้างหน้าเอกสารจากไฟล์นี้
+#          tests/openapi.test.js เทียบไฟล์นี้กับ route จริงทุกครั้งที่รัน npm test จึงตรงกับโค้ดเสมอ
+# Sprint : 8 | Phase 2-3
+# ==============================================================================
+
+openapi: 3.0.3
+
+info:
+  title: Music Library API
+  version: 1.0.0
+  description: |
+    API จัดการคลังเพลง ศิลปิน และเพลย์ลิสต์ (รหัสนิสิต 67160005, Pno 6)
+
+    **รูปแบบการตอบกลับ**
+    - สำเร็จ: `{ "message": "...", "data": ... }` (ลบสำเร็จตอบ 204 ไม่มี body)
+    - ผิดพลาด: `{ "error": { "code": "...", "message": "..." } }`
+
+servers:
+  - url: http://localhost:3100
+    description: เซิร์ฟเวอร์ที่รันในเครื่อง (npm start)
+
+tags:
+  - name: Health
+    description: ตรวจสถานะเซิร์ฟเวอร์
+  - name: Artists
+    description: ศิลปิน
+  - name: Songs
+    description: เพลง
+  - name: Playlists
+    description: เพลย์ลิสต์
+  - name: External
+    description: ข้อมูลเสริมจาก iTunes (มี Timeout, Retry, Fallback)
+  - name: Microservices
+    description: แนะนำเพลงและสถิติภาพรวม
+
+# ==============================================================================
+# 1. เส้นทาง (Paths)
+# ==============================================================================
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: ตรวจสถานะเซิร์ฟเวอร์
+      responses:
+        "200":
+          description: เซิร์ฟเวอร์พร้อมใช้งาน
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Music Library API is ready to use!
+
+  # ----------------------------------------------------------------------------
+  # Artists
+  # ----------------------------------------------------------------------------
+  /api/v1/artists:
+    get:
+      tags: [Artists]
+      summary: รายชื่อศิลปินทั้งหมด (เรียงตามชื่อ)
+      responses:
+        "200":
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: สำเร็จ }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Artist" }
+    post:
+      tags: [Artists]
+      summary: เพิ่มศิลปินใหม่ (UC-04)
+      description: ชื่อศิลปินต้องไม่ซ้ำกับที่มีอยู่ (บังคับด้วย UNIQUE ในฐานข้อมูล)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ArtistInput" }
+      responses:
+        "201":
+          description: เพิ่มสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: เพิ่มศิลปินสำเร็จ }
+                  data: { $ref: "#/components/schemas/Artist" }
+        "400": { $ref: "#/components/responses/BadRequestBody" }
+        "409":
+          description: มีศิลปินชื่อนี้อยู่แล้ว
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example: { error: { code: DUPLICATE_ARTIST, message: มีศิลปินชื่อนี้อยู่แล้ว } }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /api/v1/artists/{id}/songs:
+    get:
+      tags: [Artists]
+      summary: เพลงทั้งหมดของศิลปิน (UC-02)
+      description: ศิลปินที่มีอยู่แต่ยังไม่มีเพลงจะได้ 200 พร้อม `song_count` เป็น 0 ส่วนศิลปินที่ไม่มีอยู่จริงได้ 404
+      parameters:
+        - { $ref: "#/components/parameters/IdPath" }
+      responses:
+        "200":
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: สำเร็จ }
+                  data: { $ref: "#/components/schemas/ArtistWithSongs" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  # ----------------------------------------------------------------------------
+  # Songs
+  # ----------------------------------------------------------------------------
+  /api/v1/songs:
+    get:
+      tags: [Songs]
+      summary: รายการเพลงทั้งหมด หรือค้นหา (UC-01)
+      description: ส่ง `q` เพื่อค้นหาจากชื่อเพลงหรือชื่อศิลปิน (ไม่สนตัวพิมพ์เล็กใหญ่) ค้นไม่เจอจะได้ 200 พร้อม array ว่าง
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: คำค้นหา
+          schema: { type: string, example: cold }
+      responses:
+        "200":
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: สำเร็จ }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Song" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    post:
+      tags: [Songs]
+      summary: เพิ่มเพลงใหม่ (UC-03)
+      description: ศิลปินคนเดียวกันห้ามมีเพลงชื่อซ้ำ แต่คนละศิลปินใช้ชื่อเดียวกันได้
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SongInput" }
+      responses:
+        "201":
+          description: เพิ่มสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: เพิ่มเพลงสำเร็จ }
+                  data: { $ref: "#/components/schemas/Song" }
+        "400": { $ref: "#/components/responses/BadRequestBody" }
+        "404": { $ref: "#/components/responses/ArtistNotFound" }
+        "409": { $ref: "#/components/responses/DuplicateSong" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /api/v1/songs/{id}:
+    get:
+      tags: [Songs]
+      summary: รายละเอียดเพลง 1 เพลง
+      parameters:
+        - { $ref: "#/components/parameters/IdPath" }
+      responses:
+        "200":
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: สำเร็จ }
+                  data: { $ref: "#/components/schemas/Song" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    put:
+      tags: [Songs]
+      summary: แก้ไขเพลงทั้งระเบียน
+      description: ต้องส่งครบทุกฟิลด์เหมือนตอนเพิ่ม (`release_year` ไม่ส่งหรือส่ง null ได้)
+      parameters:
+        - { $ref: "#/components/parameters/IdPath" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SongInput" }
+      responses:
+        "200":
+          description: แก้ไขสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: แก้ไขเพลงสำเร็จ }
+                  data: { $ref: "#/components/schemas/Song" }
+        "400": { $ref: "#/components/responses/BadRequestBody" }
+        "404":
+          description: ไม่พบเพลง (`NOT_FOUND`) หรือไม่พบศิลปินที่ระบุ (`ARTIST_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              examples:
+                songNotFound:
+                  value: { error: { code: NOT_FOUND, message: ไม่พบเพลงที่ระบุ } }
+                artistNotFound:
+                  value: { error: { code: ARTIST_NOT_FOUND, message: ไม่พบศิลปินที่ระบุ } }
+        "409": { $ref: "#/components/responses/DuplicateSong" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    delete:
+      tags: [Songs]
+      summary: ลบเพลงออกจากคลัง
+      description: เพลงจะหลุดจากทุกเพลย์ลิสต์โดยอัตโนมัติ (ON DELETE CASCADE) แต่ตัวเพลย์ลิสต์ยังอยู่
+      parameters:
+        - { $ref: "#/components/parameters/IdPath" }
+      responses:
+        "204": { description: ลบสำเร็จ (ไม่มี body) }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /api/v1/songs/{id}/external-info:
+    get:
+      tags: [External]
+      summary: ข้อมูลเสริมของเพลงจาก iTunes
+      description: |
+        ค้นหาเพลงใน iTunes Search API ด้วยชื่อศิลปินและชื่อเพลง
+
+        - **Timeout** 3 วินาที ต่อครั้ง
+        - **Retry** 2 ครั้ง (ยิงสูงสุด 3 ครั้ง) รอ 0.5 วินาที แล้ว 1 วินาที เฉพาะเน็ตหลุด/timeout/5xx (ไม่ลองใหม่เมื่อเป็น 4xx)
+        - **Fallback** ถ้าลองครบแล้วยังไม่ได้ ตอบ 200 พร้อมค่า default และ `source: "fallback"`
+          เพราะข้อมูลหลักของเพลงยังครบ กรณีแย่สุดใช้เวลาประมาณ 10.5 วินาที
+      parameters:
+        - { $ref: "#/components/parameters/IdPath" }
+      responses:
+        "200":
+          description: สำเร็จ (ดูฟิลด์ `source` ว่าข้อมูลมาจาก iTunes หรือเป็นค่า default)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data: { $ref: "#/components/schemas/ExternalInfoResult" }
+              examples:
+                fromItunes:
+                  summary: iTunes ตอบปกติ
+                  value:
+                    message: สำเร็จ
+                    data:
+                      song: { id: 5, title: Yellow, duration_seconds: 269, release_year: 2000, artist_id: 3, artist_name: Coldplay }
+                      external_info:
+                        album: Parachutes
+                        genre: Alternative
+                        artwork_url: https://example.com/artwork.jpg
+                        preview_url: https://example.com/preview.m4a
+                        track_url: https://music.apple.com/track
+                      source: itunes
+                      attempts: 1
+                fallback:
+                  summary: iTunes ล่ม ใช้ค่า default
+                  value:
+                    message: ไม่สามารถดึงข้อมูลเสริมจากบริการภายนอกได้ จึงแสดงค่าเริ่มต้นแทน
+                    data:
+                      song: { id: 5, title: Yellow, duration_seconds: 269, release_year: 2000, artist_id: 3, artist_name: Coldplay }
+                      external_info: { album: null, genre: ไม่ทราบ, artwork_url: null, preview_url: null, track_url: null }
+                      source: fallback
+                      attempts: 3
+                      reason: HTTP 503
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  # ----------------------------------------------------------------------------
+  # Playlists
+  # ----------------------------------------------------------------------------
+  /api/v1/playlists:
+    get:
+      tags: [Playlists]
+      summary: รายการเพลย์ลิสต์ทั้งหมดพร้อมจำนวนเพลง
+      responses:
+        "200":
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: สำเร็จ }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/PlaylistSummary" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    post:
+      tags: [Playlists]
+      summary: สร้างเพลย์ลิสต์ใหม่ (UC-05)
+      description: เจ้าของคนเดียวกันห้ามมีเพลย์ลิสต์ชื่อซ้ำ แต่คนละเจ้าของใช้ชื่อเดียวกันได้
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PlaylistInput" }
+      responses:
+        "201":
+          description: สร้างสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: สร้างเพลย์ลิสต์สำเร็จ }
+                  data: { $ref: "#/components/schemas/Playlist" }
+        "400": { $ref: "#/components/responses/BadRequestBody" }
+        "409":
+          description: เจ้าของคนนี้มีเพลย์ลิสต์ชื่อนี้อยู่แล้ว
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example: { error: { code: DUPLICATE_PLAYLIST, message: เจ้าของคนนี้มีเพลย์ลิสต์ชื่อนี้อยู่แล้ว } }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /api/v1/playlists/{id}:
+    get:
+      tags: [Playlists]
+      summary: รายละเอียดเพลย์ลิสต์ รายการเพลง และความยาวรวม (UC-08)
+      parameters:
+        - { $ref: "#/components/parameters/IdPath" }
+      responses:
+        "200":
+          description: สำเร็จ เพลงเรียงตามลำดับที่ใส่เข้ามา
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: สำเร็จ }
+                  data: { $ref: "#/components/schemas/PlaylistDetail" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /api/v1/playlists/{id}/songs:
+    post:
+      tags: [Playlists]
+      summary: เพิ่มเพลงเข้าเพลย์ลิสต์ (UC-06)
+      description: เพลงเดียวกันอยู่ได้หลายเพลย์ลิสต์ แต่ห้ามใส่ซ้ำในเพลย์ลิสต์เดียวกัน
+      parameters:
+        - { $ref: "#/components/parameters/IdPath" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [song_id]
+              properties:
+                song_id: { type: integer, minimum: 1, example: 5 }
+      responses:
+        "201":
+          description: เพิ่มสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: เพิ่มเพลงเข้าเพลย์ลิสต์สำเร็จ }
+                  data: { $ref: "#/components/schemas/PlaylistSongLink" }
+        "400": { $ref: "#/components/responses/BadRequestBody" }
+        "404":
+          description: ไม่พบเพลย์ลิสต์ (`NOT_FOUND`) หรือไม่พบเพลง (`SONG_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              examples:
+                playlistNotFound:
+                  value: { error: { code: NOT_FOUND, message: ไม่พบเพลย์ลิสต์ที่ระบุ } }
+                songNotFound:
+                  value: { error: { code: SONG_NOT_FOUND, message: ไม่พบเพลงที่ระบุ } }
+        "409":
+          description: เพลงนี้อยู่ในเพลย์ลิสต์อยู่แล้ว
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example: { error: { code: DUPLICATE_PLAYLIST_SONG, message: เพลงนี้อยู่ในเพลย์ลิสต์อยู่แล้ว } }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /api/v1/playlists/{id}/songs/{songId}:
+    delete:
+      tags: [Playlists]
+      summary: นำเพลงออกจากเพลย์ลิสต์ (UC-07)
+      description: ลบเฉพาะรายการในเพลย์ลิสต์ เพลงต้นฉบับยังอยู่ในคลังและในเพลย์ลิสต์อื่น
+      parameters:
+        - { $ref: "#/components/parameters/IdPath" }
+        - { $ref: "#/components/parameters/SongIdPath" }
+      responses:
+        "204": { description: นำออกสำเร็จ (ไม่มี body) }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  # ----------------------------------------------------------------------------
+  # Microservices
+  # ----------------------------------------------------------------------------
+  /api/v1/recommendations/songs/{id}:
+    get:
+      tags: [Microservices]
+      summary: แนะนำเพลงที่เกี่ยวข้องกับเพลงที่ระบุ
+      description: |
+        ใช้ 2 ลำดับ
+
+        1. **co_playlist** เพลงที่อยู่ในเพลย์ลิสต์เดียวกับเพลงต้นทาง เรียงจากอยู่ด้วยกันหลายเพลย์ลิสต์ที่สุดก่อน
+           (`shared_playlists`) ถ้าเท่ากันเรียงตามชื่อเพลง
+        2. **same_artist** ถ้ายังไม่ครบตาม `limit` เติมด้วยเพลงอื่นของศิลปินเดียวกัน
+      parameters:
+        - { $ref: "#/components/parameters/IdPath" }
+        - name: limit
+          in: query
+          required: false
+          description: จำนวนเพลงแนะนำสูงสุด (จำนวนเต็ม 1 ถึง 20)
+          schema: { type: integer, minimum: 1, maximum: 20, default: 5 }
+      responses:
+        "200":
+          description: สำเร็จ (ไม่มีเพลงแนะนำก็ได้ 200 พร้อม array ว่าง)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: ดึงรายการเพลงแนะนำสำเร็จ }
+                  data: { $ref: "#/components/schemas/RecommendationResult" }
+        "400":
+          description: id ไม่ถูกต้อง (`INVALID_ID`) หรือ limit ไม่ถูกต้อง (`VALIDATION_ERROR`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              examples:
+                invalidId:
+                  value: { error: { code: INVALID_ID, message: id ต้องเป็นจำนวนเต็มบวก } }
+                invalidLimit:
+                  value: { error: { code: VALIDATION_ERROR, message: limit ต้องเป็นจำนวนเต็มระหว่าง 1 ถึง 20 } }
+        "404":
+          description: ไม่พบเพลงที่ระบุ
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example: { error: { code: NOT_FOUND, message: ไม่พบเพลงที่ระบุเพื่อทำการแนะนำ } }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /api/v1/analytics/overview:
+    get:
+      tags: [Microservices]
+      summary: สถิติภาพรวมของคลังเพลง
+      description: จำนวนเพลง ศิลปิน เพลย์ลิสต์ เวลารวม เวลาเฉลี่ย และศิลปินที่มีเพลงมากที่สุด (เท่ากันเรียงตามชื่อ)
+      responses:
+        "200":
+          description: สำเร็จ (คลังไม่มีเพลงเลยจะได้ 0 ทั้งหมดและ `top_artist` เป็น null)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: ดึงสถิติภาพรวมสำเร็จ }
+                  data: { $ref: "#/components/schemas/Analytics" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+# ==============================================================================
+# 2. ส่วนประกอบที่ใช้ซ้ำ (Components)
+# ==============================================================================
+components:
+  # ----------------------------------------------------------------------------
+  # พารามิเตอร์ใน URL
+  # ----------------------------------------------------------------------------
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      description: รหัสเป็นจำนวนเต็มบวก
+      schema: { type: integer, minimum: 1, example: 1 }
+    SongIdPath:
+      name: songId
+      in: path
+      required: true
+      description: รหัสเพลง เป็นจำนวนเต็มบวก
+      schema: { type: integer, minimum: 1, example: 1 }
+
+  # ----------------------------------------------------------------------------
+  # Response ที่ใช้ซ้ำ
+  # ----------------------------------------------------------------------------
+  responses:
+    InvalidId:
+      description: id ใน URL ไม่ใช่จำนวนเต็มบวก
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: { code: INVALID_ID, message: id ต้องเป็นจำนวนเต็มบวก } }
+    BadRequestBody:
+      description: ข้อมูลที่ส่งมาไม่ถูกต้อง (`VALIDATION_ERROR`) JSON พัง (`INVALID_JSON`) หรือ id ใน URL ไม่ถูกต้อง (`INVALID_ID`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          examples:
+            validation:
+              value: { error: { code: VALIDATION_ERROR, message: duration_seconds ต้องเป็นจำนวนเต็มบวก } }
+            invalidJson:
+              value: { error: { code: INVALID_JSON, message: รูปแบบ JSON ไม่ถูกต้อง } }
+            invalidId:
+              value: { error: { code: INVALID_ID, message: id ต้องเป็นจำนวนเต็มบวก } }
+    NotFound:
+      description: ไม่พบข้อมูลที่ระบุ
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: { code: NOT_FOUND, message: ไม่พบข้อมูลที่ระบุ } }
+    ArtistNotFound:
+      description: ไม่พบศิลปินที่ระบุ (artist_id ไม่มีอยู่จริง)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: { code: ARTIST_NOT_FOUND, message: ไม่พบศิลปินที่ระบุ } }
+    DuplicateSong:
+      description: ศิลปินคนนี้มีเพลงชื่อนี้อยู่แล้ว
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: { code: DUPLICATE_SONG, message: ศิลปินคนนี้มีเพลงชื่อนี้อยู่แล้ว } }
+    InternalError:
+      description: ข้อผิดพลาดภายในระบบ (เช่น ฐานข้อมูลล่ม) ไม่เปิดเผยรายละเอียดภายใน
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: { code: INTERNAL_SERVER_ERROR, message: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ } }
+
+  # ----------------------------------------------------------------------------
+  # รูปแบบข้อมูล (Schemas)
+  # ----------------------------------------------------------------------------
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum:
+                - INVALID_ID
+                - VALIDATION_ERROR
+                - INVALID_JSON
+                - NOT_FOUND
+                - ROUTE_NOT_FOUND
+                - ARTIST_NOT_FOUND
+                - SONG_NOT_FOUND
+                - DUPLICATE_ARTIST
+                - DUPLICATE_SONG
+                - DUPLICATE_PLAYLIST
+                - DUPLICATE_PLAYLIST_SONG
+                - INTERNAL_SERVER_ERROR
+            message: { type: string }
+
+    Artist:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: Bodyslam }
+        country: { type: string, example: ไทย }
+        created_at: { type: string, format: date-time }
+
+    ArtistInput:
+      type: object
+      required: [name, country]
+      properties:
+        name: { type: string, maxLength: 120, example: Bodyslam }
+        country: { type: string, maxLength: 80, example: ไทย }
+
+    ArtistWithSongs:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: Bodyslam }
+        country: { type: string, example: ไทย }
+        song_count: { type: integer, example: 2 }
+        songs:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer, example: 1 }
+              title: { type: string, example: ความเชื่อ }
+              duration_seconds: { type: integer, example: 342 }
+              release_year: { type: integer, nullable: true, example: 2004 }
+
+    Song:
+      type: object
+      properties:
+        id: { type: integer, example: 5 }
+        title: { type: string, example: Yellow }
+        duration_seconds: { type: integer, example: 269 }
+        release_year: { type: integer, nullable: true, example: 2000 }
+        artist_id: { type: integer, example: 3 }
+        artist_name: { type: string, example: Coldplay }
+
+    SongInput:
+      type: object
+      required: [artist_id, title, duration_seconds]
+      properties:
+        artist_id: { type: integer, minimum: 1, example: 3 }
+        title: { type: string, maxLength: 180, example: Yellow }
+        duration_seconds: { type: integer, minimum: 1, example: 269 }
+        release_year:
+          type: integer
+          nullable: true
+          minimum: 1000
+          maximum: 9999
+          description: ปี ค.ศ. 4 หลัก (ไม่ส่งหรือส่ง null ได้)
+          example: 2000
+
+    ExternalInfo:
+      type: object
+      properties:
+        album: { type: string, nullable: true }
+        genre: { type: string, nullable: true }
+        artwork_url: { type: string, nullable: true }
+        preview_url: { type: string, nullable: true }
+        track_url: { type: string, nullable: true }
+
+    ExternalInfoResult:
+      type: object
+      properties:
+        song: { $ref: "#/components/schemas/Song" }
+        external_info:
+          allOf:
+            - $ref: "#/components/schemas/ExternalInfo"
+          nullable: true
+          description: เป็น null เมื่อ iTunes ตอบปกติแต่ไม่พบเพลงนี้
+        source:
+          type: string
+          enum: [itunes, fallback]
+          description: ที่มาของข้อมูล
+        attempts:
+          type: integer
+          description: จำนวนครั้งที่ยิง iTunes จริง
+        reason:
+          type: string
+          description: เหตุผลที่ล้มเหลว (มีเฉพาะเมื่อ source เป็น fallback)
+          example: HTTP 503
+
+    Playlist:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: เพลงไทยฟังชิล }
+        owner_name: { type: string, example: สมชาย ใจดี }
+        created_at: { type: string, format: date-time }
+
+    PlaylistInput:
+      type: object
+      required: [name, owner_name]
+      properties:
+        name: { type: string, maxLength: 120, example: เพลงไทยฟังชิล }
+        owner_name: { type: string, maxLength: 100, example: สมชาย ใจดี }
+
+    PlaylistSummary:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: เพลงไทยฟังชิล }
+        owner_name: { type: string, example: สมชาย ใจดี }
+        created_at: { type: string, format: date-time }
+        song_count: { type: integer, example: 4 }
+
+    PlaylistDetail:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: เพลงไทยฟังชิล }
+        owner_name: { type: string, example: สมชาย ใจดี }
+        created_at: { type: string, format: date-time }
+        song_count: { type: integer, example: 4 }
+        total_duration_seconds: { type: integer, example: 1113 }
+        songs:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer, example: 1 }
+              title: { type: string, example: ความเชื่อ }
+              duration_seconds: { type: integer, example: 342 }
+              artist_name: { type: string, example: Bodyslam }
+
+    PlaylistSongLink:
+      type: object
+      properties:
+        id: { type: integer, example: 10 }
+        playlist_id: { type: integer, example: 1 }
+        song_id: { type: integer, example: 5 }
+        added_at: { type: string, format: date-time }
+
+    RecommendationResult:
+      type: object
+      properties:
+        target_song:
+          type: object
+          properties:
+            id: { type: integer, example: 2 }
+            artist_id: { type: integer, example: 1 }
+            title: { type: string, example: ปล่อย }
+        total_recommended: { type: integer, example: 4 }
+        recommendations:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer, example: 1 }
+              title: { type: string, example: ความเชื่อ }
+              duration_seconds: { type: integer, example: 342 }
+              artist_name: { type: string, example: Bodyslam }
+              shared_playlists:
+                type: integer
+                description: จำนวนเพลย์ลิสต์ที่เพลงนี้อยู่ร่วมกับเพลงต้นทาง (same_artist เป็น 0)
+                example: 1
+              reason:
+                type: string
+                enum: [co_playlist, same_artist]
+
+    Analytics:
+      type: object
+      properties:
+        overview:
+          type: object
+          properties:
+            total_songs: { type: integer, example: 8 }
+            total_artists: { type: integer, example: 4 }
+            total_playlists: { type: integer, example: 3 }
+            total_duration_minutes: { type: integer, example: 39 }
+            avg_song_duration_seconds: { type: number, example: 291.3 }
+        top_artist:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer, example: 1 }
+            name: { type: string, example: Bodyslam }
+            song_count: { type: integer, example: 2 }

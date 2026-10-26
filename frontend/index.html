@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<!--
+==============================================================================
+index.html — หน้าเว็บจัดการคลังเพลง (Frontend)
+------------------------------------------------------------------------------
+หน้าที่ : ดู/ค้นหา/เพิ่ม/ลบเพลง โดยเรียก Music Library API ของเราจริง
+ทำไม   : เป็นส่วนที่ผู้ใช้ทั่วไปมองเห็น ใช้ HTML/CSS/JavaScript ล้วน ไม่ต้องติดตั้งอะไรเพิ่ม
+Sprint : 7 | Phase 3
+วิธีใช้ : เปิด MySQL และ API (npm start) ก่อน แล้วเปิดไฟล์นี้ด้วยเบราว์เซอร์ได้เลย
+API ที่เรียก:
+  GET    /api/v1/artists        โหลดรายชื่อศิลปินใส่ตัวเลือกในฟอร์ม
+  GET    /api/v1/songs?q=       แสดงรายการเพลงและค้นหา (UC-01)
+  POST   /api/v1/songs          เพิ่มเพลงใหม่ (UC-03)
+  DELETE /api/v1/songs/:id      ลบเพลง
+==============================================================================
+-->
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการคลังเพลง</title>
+  <style>
+    /* ------------------------------------------------------------------------
+       1. สไตล์ทั่วไป
+       ------------------------------------------------------------------------ */
+    body {
+      font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
+      max-width: 860px;
+      margin: 24px auto;
+      padding: 0 16px;
+      color: #1f2937;
+      background: #f9fafb;
+      line-height: 1.5;
+    }
+    h1 { margin: 0 0 4px; font-size: 24px; }
+    h2 { margin: 0 0 12px; font-size: 17px; }
+    .subtitle { margin: 0 0 20px; color: #6b7280; font-size: 14px; }
+
+    section {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* ------------------------------------------------------------------------
+       2. ข้อความแจ้งผล (สำเร็จ = เขียว, ผิดพลาด = แดง)
+       ------------------------------------------------------------------------ */
+    #message {
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    #message.success { background: #e7f6ec; color: #166534; border: 1px solid #bbe5c8; }
+    #message.error   { background: #fdecec; color: #991b1b; border: 1px solid #f5c2c2; }
+
+    /* ------------------------------------------------------------------------
+       3. ฟอร์มและปุ่ม
+       ------------------------------------------------------------------------ */
+    .form-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+    .field { flex: 1 1 170px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    button {
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+    }
+    button:disabled { background: #9ca3af; cursor: not-allowed; }
+    button.danger { background: #dc2626; padding: 4px 10px; font-size: 13px; }
+    .actions { margin-top: 12px; text-align: right; }
+    .search-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .search-row input { flex: 1; }
+
+    /* ------------------------------------------------------------------------
+       4. ตารางรายการเพลง และข้อความสถานะ (กำลังโหลด / ว่าง / ผิดพลาด)
+       ------------------------------------------------------------------------ */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f3f4f6; font-weight: 600; }
+    #list-status { padding: 24px 0; text-align: center; color: #6b7280; }
+    #list-status.error { color: #991b1b; }
+    #list-status:empty { display: none; } /* ไม่มีข้อความ = ไม่กินพื้นที่ */
+  </style>
+</head>
+<body>
+
+  <h1>ระบบจัดการคลังเพลง</h1>
+  <p class="subtitle">Music Library | รหัสนิสิต 67160005 (Pno 6)</p>
+
+  <!-- ข้อความแจ้งผลการทำงาน (ซ่อนไว้จนกว่าจะมีข้อความ) -->
+  <div id="message" role="status" aria-live="polite" hidden></div>
+
+  <!-- ส่วนที่ 1: ฟอร์มเพิ่มเพลง (POST /songs) -->
+  <section>
+    <h2>เพิ่มเพลงใหม่</h2>
+    <!-- novalidate: ปิดการตรวจของเบราว์เซอร์ เพื่อให้ JavaScript ของเราแสดงข้อความภาษาไทยที่ชัดเจนเอง -->
+    <form id="song-form" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="artist">ศิลปิน *</label>
+          <select id="artist">
+            <option value="">-- เลือกศิลปิน --</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="title">ชื่อเพลง *</label>
+          <input id="title" type="text" maxlength="180" placeholder="เช่น ความเชื่อ">
+        </div>
+        <div class="field">
+          <label for="duration">ความยาว (วินาที) *</label>
+          <input id="duration" type="text" inputmode="numeric" placeholder="เช่น 240">
+        </div>
+        <div class="field">
+          <label for="year">ปีที่วางจำหน่าย (ค.ศ.)</label>
+          <input id="year" type="text" inputmode="numeric" placeholder="เช่น 2024">
+        </div>
+      </div>
+      <div class="actions">
+        <button id="save-button" type="submit">บันทึกเพลง</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ส่วนที่ 2: รายการเพลงและค้นหา (GET /songs, DELETE /songs/:id) -->
+  <section>
+    <h2>รายการเพลง</h2>
+    <form id="search-form" class="search-row">
+      <input id="search" type="text" placeholder="ค้นหาจากชื่อเพลงหรือชื่อศิลปิน">
+      <button type="submit">ค้นหา</button>
+    </form>
+
+    <!-- ข้อความสถานะของรายการ: กำลังโหลด / ไม่พบเพลง / เกิดข้อผิดพลาด -->
+    <div id="list-status" aria-live="polite"></div>
+
+    <table id="song-table" hidden>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>ชื่อเพลง</th>
+          <th>ศิลปิน</th>
+          <th>ความยาว</th>
+          <th>ปี</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="song-list"></tbody>
+    </table>
+  </section>
+
+  <script>
+    // ==========================================================================
+    // 1. ตั้งค่าและตัวช่วย
+    // ==========================================================================
+    // ทำไม: เปลี่ยนที่นี่ที่เดียวถ้า API อยู่พอร์ตอื่น
+    const API_URL = "http://localhost:3100/api/v1";
+
+    const messageBox = document.getElementById("message");
+    const listStatus = document.getElementById("list-status");
+    const songTable = document.getElementById("song-table");
+    const songList = document.getElementById("song-list");
+    const saveButton = document.getElementById("save-button");
+
+    // หน้าที่: แสดงข้อความแจ้งผล (isError = true เป็นสีแดง)
+    function showMessage(text, isError) {
+      messageBox.textContent = text;
+      messageBox.className = isError ? "error" : "success";
+      messageBox.hidden = false;
+    }
+
+    // หน้าที่: แปลงวินาทีเป็น นาที:วินาที เช่น 342 -> 5:42
+    function formatDuration(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      return `${minutes}:${seconds}`;
+    }
+
+    // หน้าที่: เรียก API แล้วคืนข้อมูล JSON (หรือ null ถ้าเป็น 204 ที่ไม่มี body)
+    // ทำไม: รวมการจัดการ error ไว้ที่เดียว ทุกฟังก์ชันที่เรียก API จึงได้ข้อความภาษาไทยที่อ่านรู้เรื่อง
+    //       - ติดต่อเซิร์ฟเวอร์ไม่ได้ (fetch ล้มเหลว) -> บอกให้ตรวจว่าเปิด API แล้วหรือยัง
+    //       - เซิร์ฟเวอร์ตอบ error -> ใช้ข้อความจาก { error: { message } } ที่ API ส่งมา
+    async function callApi(path, options) {
+      let response;
+      try {
+        response = await fetch(API_URL + path, options);
+      } catch (err) {
+        throw new Error("ติดต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบว่าเปิด API (npm start) และ MySQL แล้ว");
+      }
+      if (response.status === 204) return null;
+
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(body && body.error ? body.error.message : `เกิดข้อผิดพลาด (HTTP ${response.status})`);
+      }
+      return body;
+    }
+
+    // ==========================================================================
+    // 2. โหลดรายชื่อศิลปินใส่ตัวเลือกในฟอร์ม (GET /artists)
+    // ==========================================================================
+    async function loadArtists() {
+      try {
+        const result = await callApi("/artists");
+        const select = document.getElementById("artist");
+        for (const artist of result.data) {
+          const option = document.createElement("option");
+          option.value = artist.id;
+          option.textContent = `${artist.name} (${artist.country})`;
+          select.appendChild(option);
+        }
+      } catch (err) {
+        showMessage(err.message, true);
+      }
+    }
+
+    // ==========================================================================
+    // 3. แสดงรายการเพลงและค้นหา (GET /songs?q=) — UC-01
+    // ==========================================================================
+    // หน้าที่: โหลดรายการเพลง (ถ้าส่ง query จะค้นหา) แล้วแสดงในตาราง
+    // ทำไม: มี 3 สถานะที่ผู้ใช้ต้องเห็นชัด ไม่ปล่อยหน้าจอเงียบ
+    //       กำลังโหลด / ไม่พบข้อมูล / เกิดข้อผิดพลาด
+    async function loadSongs(query) {
+      songTable.hidden = true;
+      listStatus.className = "";
+      listStatus.textContent = "กำลังโหลดข้อมูล...";
+
+      try {
+        const path = query ? `/songs?q=${encodeURIComponent(query)}` : "/songs";
+        const result = await callApi(path);
+
+        if (result.data.length === 0) {
+          listStatus.textContent = query ? `ไม่พบเพลงที่ตรงกับ "${query}"` : "ยังไม่มีเพลงในคลัง";
+          return;
+        }
+        renderSongs(result.data);
+        listStatus.textContent = "";
+        songTable.hidden = false;
+      } catch (err) {
+        listStatus.className = "error";
+        listStatus.textContent = err.message;
+      }
+    }
+
+    // หน้าที่: สร้างแถวของตารางจากรายการเพลง
+    // ทำไม: ใส่ข้อมูลด้วย textContent (ไม่ใช่ innerHTML) ชื่อเพลงจึงแสดงเป็นข้อความธรรมดาเสมอ
+    function renderSongs(songs) {
+      songList.replaceChildren();
+      songs.forEach((song, index) => {
+        const row = document.createElement("tr");
+
+        const cells = [
+          index + 1,
+          song.title,
+          song.artist_name,
+          formatDuration(song.duration_seconds),
+          song.release_year || "-",
+        ];
+        for (const value of cells) {
+          const cell = document.createElement("td");
+          cell.textContent = value;
+          row.appendChild(cell);
+        }
+
+        const actionCell = document.createElement("td");
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "danger";
+        deleteButton.textContent = "ลบ";
+        deleteButton.addEventListener("click", () => deleteSong(song));
+        actionCell.appendChild(deleteButton);
+        row.appendChild(actionCell);
+
+        songList.appendChild(row);
+      });
+    }
+
+    document.getElementById("search-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      loadSongs(document.getElementById("search").value.trim());
+    });
+
+    // ==========================================================================
+    // 4. เพิ่มเพลง (POST /songs) พร้อมตรวจข้อมูลก่อนส่ง — UC-03
+    // ==========================================================================
+    // หน้าที่: ตรวจข้อมูลในฟอร์ม คืนข้อความ error ข้อแรกที่พบ หรือ null ถ้าผ่านทั้งหมด
+    // ถามอาจารย์: ทำไม frontend ตรวจแล้ว API ยังต้องตรวจซ้ำ
+    //             -> frontend ตรวจเพื่อให้ผู้ใช้เห็นข้อผิดพลาดทันทีโดยไม่ต้องรอเครือข่าย
+    //                แต่ถูกข้ามได้ (ยิง API ตรง ๆ) API จึงต้องตรวจเป็นด่านจริงเสมอ
+    function validateSongForm(data) {
+      if (data.artistId === "") return "กรุณาเลือกศิลปิน";
+      if (data.title === "") return "กรุณากรอกชื่อเพลง";
+      if (data.title.length > 180) return "ชื่อเพลงต้องยาวไม่เกิน 180 ตัวอักษร";
+      if (!/^[1-9]\d*$/.test(data.duration)) return "ความยาวต้องเป็นจำนวนเต็มบวก (หน่วยวินาที)";
+      if (data.year !== "" && !/^[1-9]\d{3}$/.test(data.year)) return "ปีที่วางจำหน่ายต้องเป็นตัวเลข ค.ศ. 4 หลัก";
+      return null;
+    }
+
+    document.getElementById("song-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const data = {
+        artistId: document.getElementById("artist").value,
+        title: document.getElementById("title").value.trim(),
+        duration: document.getElementById("duration").value.trim(),
+        year: document.getElementById("year").value.trim(),
+      };
+
+      const problem = validateSongForm(data);
+      if (problem) {
+        showMessage(problem, true);
+        return;
+      }
+
+      // ทำไม: ปิดปุ่มระหว่างรอ กันผู้ใช้กดซ้ำจนเพิ่มเพลงสองรอบ
+      saveButton.disabled = true;
+      saveButton.textContent = "กำลังบันทึก...";
+      try {
+        await callApi("/songs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            artist_id: Number(data.artistId),
+            title: data.title,
+            duration_seconds: Number(data.duration),
+            release_year: data.year === "" ? null : Number(data.year),
+          }),
+        });
+        showMessage(`เพิ่มเพลง "${data.title}" เรียบร้อยแล้ว`, false);
+        for (const id of ["title", "duration", "year"]) document.getElementById(id).value = "";
+        loadSongs(document.getElementById("search").value.trim());
+      } catch (err) {
+        showMessage(err.message, true);
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "บันทึกเพลง";
+      }
+    });
+
+    // ==========================================================================
+    // 5. ลบเพลง (DELETE /songs/:id)
+    // ==========================================================================
+    // ทำไม: ถามยืนยันก่อนลบ เพราะลบแล้วย้อนกลับไม่ได้ (และเพลงจะหลุดจากเพลย์ลิสต์ทุกอันด้วย)
+    async function deleteSong(song) {
+      if (!confirm(`ต้องการลบเพลง "${song.title}" ใช่หรือไม่?`)) return;
+
+      try {
+        await callApi(`/songs/${song.id}`, { method: "DELETE" });
+        showMessage(`ลบเพลง "${song.title}" เรียบร้อยแล้ว`, false);
+        loadSongs(document.getElementById("search").value.trim());
+      } catch (err) {
+        showMessage(err.message, true);
+      }
+    }
+
+    // ==========================================================================
+    // 6. เริ่มทำงานเมื่อเปิดหน้าเว็บ
+    // ==========================================================================
+    loadArtists();
+    loadSongs("");
+  </script>
+</body>
+</html>
